@@ -51,11 +51,23 @@ def prepsmart_api():
         if "error" in result:
             return jsonify(result), 500
 
+        # Extract and validate the answer
+        answer = result.get("answer", "")
+        score = result.get("score", 0.0)
+
+        # Validate the response
+        if not answer or score < 0.1 or answer == context or \
+           "interview" in answer.lower() or \
+           "prepare" in answer.lower():
+            return jsonify({
+                "error": "The model failed to provide a relevant answer to your question"
+            }), 500
+
         # Format response
         response = {
             "question": question,
-            "answer": result.get("answer", "No answer found"),
-            "score": result.get("score", 0.0)
+            "answer": answer,
+            "score": score
         }
 
         return jsonify(response), 200
